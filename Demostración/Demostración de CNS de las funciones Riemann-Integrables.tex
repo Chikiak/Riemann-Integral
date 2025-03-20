@@ -1,0 +1,334 @@
+\documentclass[10pt]{article}
+
+\title{Demostración de la condición necesaria y suficiente de las funciones Riemann-Integrables}
+\date{2025-03-17}
+\author{Adrián Estevez Álvarez; Javier Fontes Basabe  }
+
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb}
+\usepackage[margin = 3cm]{geometry}
+\begin{document}
+\begin{titlepage}
+		\centering
+			{\bfseries\LARGE Universidad de La Habana \par}
+				\vspace{1cm}
+			{\scshape\Large Facultad de Matemática y Computación \par}
+			{\scshape\Large MATCOM \par}
+				\vspace{3cm}
+			{\scshape\Huge Demostración de la condición necesaria y suficiente de las funciones Riemann-Integrables \par}
+				\vspace{3cm}
+			
+				\vfill
+			{\Large Autores: \par}
+			{\Large Adrán Estévez Álvarez \par}
+			{\Large Javier Fontes Basabe \par}
+				\vfill
+			{\Large Marzo 2025 \par}
+	\end{titlepage}
+
+
+\section{Introducción}
+Las integrales son herramientas fundamentales en el Análisis Matemático, especialmente en el cálculo de áreas, volúmenes y otros valores acumulativos. Entre sus distintos enfoques, la integral de Riemann se destaca por su construcción intuitiva basada en sumas de Riemann, lo que permite una aproximación progresiva a la noción de integral a través de particiones del intervalo de integración. \par
+
+Para que una función sea integrable en el sentido de Riemann, debe cumplir ciertas condiciones específicas, como ser acotada. En este contexto, el teorema de necesidad y suficiencia para la integrabilidad de Riemann establece un criterio clave: la existencia de particiones adecuadas y la limitación de la suma de las oscilaciones de la función en subintervalos garantizan su integrabilidad.\par
+
+A lo largo de este documento, se presentará esta condición fundamental, junto con los teoremas y propiedades utilizados en su formulación y demostración. Finalmente, se incluirá un análisis detallado de la demostración del teorema, acompañado de un programa relacionado que ilustra su aplicación.\par
+
+\section{ Teorema:  }
+Condición necesaria y suficiente de las funciones Riemann-Integrables
+\begin{equation}
+    (CNS): \; f \in \mathcal{R}[a, b] \iff \forall \epsilon > 0,  S(f,P)-s(f,P) < \varepsilon. \iff\underline{I} =\overline{I}
+\end{equation}
+
+\\
+
+\section{Definiciones y propiedades:}
+Para la demostración del teorema se asume que el lector conoce las siguientes definiciones y propiedades:
+\\
+\item \textbf{Definición 1:} (Definción de Partición.)
+\\
+Sea $[a, b]$ un intervalo cerrado en $\mathbb{R}$. Una partición $P$ de $[a, b]$ es un conjunto finito de puntos ordenados: 
+				\begin{equation}
+					\label{def:partición}
+					P = \{x_0, x_1, ..., x_n\}: \quad a = x_0 < x_1 < ... < x_n = b 
+				\end{equation}
+				\begin{equation}
+					\label{def:partMax}
+					\|P\| = max_{1\leq i \leq n}(x_i - x_{i-1})
+\end{equation}
+
+\item \textbf{Definición 2:} (Suma integral de Riemann.)
+
+Sea $P = \{x_0, x_1, \dots, x_n\}$ una partición de $[a,b]$. Definimos la suma integral de $f$ respecto a $P$ como:
+\begin{equation}
+    \sigma(f, P,\xi_i) = \sum_{i=1}^{n} f(\xi_i) (x_i - x_{i-1}),
+\end{equation}
+donde $\xi_i$ es un punto en el subintervalo $[x_{i-1}, x_i]$.
+\\
+
+
+\item \textbf{Definición 3:} (Límite de la suma integral de Riemann.)
+
+ Dada una función $f$ y una partición $P$, se denota $\lim \sigma (f,P_k,\{\xi_i\}) = I$, donde $I$ es el límite de la Suma de Riemann asociada a la función $f$ en la partición $P$ con $I \in \mathbb{R}$. Se cumple que: 
+				\begin{equation}
+					\label{def:limR} 
+					\lim \sigma (f,P,\{\xi_i\}) = I \iff \forall \epsilon \quad\exists P_\epsilon \quad P_\epsilon\supset P: \quad |\sigma (f,P_\epsilon,\{\xi_i\}) - I| < \epsilon
+				\end{equation}
+\textbf{Definición 4:} (Definición de integral de Riemann)
+\\
+ Dada una función $f$ y un intervalo $[a, b]$, se dice que la función es Riemann-Integrable en el intervalo $[a, b]$, denotado por $f\in\mathcal{R}[a; b]$ si cumple con la siguiente propiedad: 
+				\begin{equation}
+					\label{def:integR}
+					f\in\mathcal{R}[a; b] \iff \exists I:\forall P \quad\lim \sigma (f,P,\{\xi_i\}) = I
+				\end{equation}
+                \\
+                
+\item \textbf{Definición 5:} (Sumas de Darboux.)
+\\ Dada una función $f$ y una partición $P$ definimos como:
+\\
+Sumatoria superior de Darboux de $f$ respecto a una partición $P = \{x_0, x_1, \dots, x_n\}$ se define como:
+\begin{equation}
+    S(f, P) = \sum_{i=1}^{n} M_i (x_i - x_{i-1}),
+\end{equation}
+donde $M_i = \sup \{ f(x) : x \in [x_{i-1}, x_i] \}$.
+
+La sumatoria inferior de Darboux de $f$ respecto a una partición $P$ se define como:
+\begin{equation}
+    s(f, P) = \sum_{i=1}^{n} m_i (x_i - x_{i-1}),
+\end{equation}
+donde $m_i = \inf \{ f(x) : x \in [x_{i-1}, x_i] \}$.
+
+\\
+\\
+
+\item \textbf{Definición 6:} (Integral superior e inferior de Darboux.)
+\\
+Dada una función $f$ y un intervalo $[a, b]$, se denomina Integral Superior e Integral Inferior a los números reales $\overline{\mathrm{I}}$ e $\underline{\mathrm{I}}$, respectivamente, que cumplen la suigientes propiedades:
+				\begin{equation}
+					\label{def:ingInf}
+					\underline{\mathrm{I}} = sup \{s(f, P)\}
+				\end{equation}
+				\begin{equation}
+					\label{def:ingSup}
+					\overline{\mathrm{I}} = inf \{S(f, P)\}
+				\end{equation}
+			\item 
+
+
+
+
+\item \textbf{Propiedad 1:} 
+Sea $\sigma(P, \xi_i)$ una suma integral correspondiente a una partición $P$. Entonces, cualquiera que sea la selección de los puntos $\xi_i \in [x_{i-1}, x_i]$ se tiene:
+\begin{equation}
+    s \leq \sigma(P, \xi_i) \leq S.
+\end{equation}
+
+\item \textbf{Propiedad 2:} 
+Si $\sigma(P, \xi_i)$ representa una suma integral cualquiera correspondiente a una partición $P$, entonces, se cumple que:
+
+\[
+s = \inf_{\xi_i} \sigma(P, \xi_i)   
+\]
+\[ S = \sup_{\xi_i} \sigma(P, \xi_i) \]
+
+
+\item \textbf{Propiedad 3:} Siendo $P'$ y  $P $ dos particiones y $P'$ es una partición más fina que $P$, si sus sumas inferiores y superiores son $s'$, $s$, $S'$ y $S$ respectivamente, entonces se cumple :
+\begin{equation}
+    s \leq s' \leq S' \leq S
+\end{equation}
+
+\item \textbf{Propiedad 4:} Sean $P'$ y $P''$  dos particiones en el intervalo $[a,b]$  y $f(x)$ una función acotada en dicho intervalo. Entonces la suma inferior correspondiente a una de las particiones es siempre menor igual que la suma superior correspondiente a la otra partición. 
+
+
+\item \textbf{Propiedad 5.1:} 
+\begin{equation}
+   \overline{I} = \inf  S(f, P)\implies \forall \epsilon > 0, \exists \, P_\epsilon \text{ tal que } S(f, P_\epsilon)\leq \  \overline{I} + \epsilon
+
+\end{equation}
+\begin{equation}
+   \overline{I} = \inf  S(f, P)\implies \forall P \; S(f, P_\epsilon) \geq    \overline{I}
+
+\end{equation}
+\item \textbf{Propiedad 5.2:} 
+\begin{equation}
+   \underline{I} = \sup  s(f, P)\implies \forall \epsilon > 0, \exists \, P_\epsilon \text{ tal que } s(f, P_\epsilon)\geq \  \overline{I} -\epsilon
+
+\end{equation}
+\begin{equation}
+   \underline{I} = \sup  s(f, P)\implies \forall P \; s(f, P_\epsilon) \leq    \underline{I}
+
+\end{equation}
+
+\\
+\item \textbf{Propiedad 6: Propiedad de Acotación de la Integral Superior e Inferior:} Dada una función $f$ y un intervalo $[a, b]$, se cumple que:
+				\begin{equation}
+					\label{prp:infSup}
+					\underline{\mathrm{I}} \leq \overline{\mathrm{I}}
+				\end{equation}
+		\end{itemize}
+
+
+\section{Demostración}
+\\ Comencemos demostrando que:
+\begin{equation}
+     f \in \mathcal{R}[a, b] \implies \forall \epsilon > 0,  S(f,P)-s(f,P) < \varepsilon
+\end{equation}
+De la definición número 4 tenemos:
+\begin{align*}
+			f\in\mathcal{R}[a; b] &\iff \exists I:\forall P \quad\lim \sigma (f,P,\{\xi_i\}) = I \quad \\
+			&\iff \exists I:\forall P \quad\forall \epsilon \quad\exists P_\epsilon \quad P_\epsilon\supset P: \quad |\sigma (f,P_\epsilon,\{\xi_i\} - I| < \epsilon \quad  \\
+			&\iff \exists I:\forall \epsilon \quad\forall P \quad\exists P_\epsilon \quad P_\epsilon\supset P: \quad |\sigma (f,P_\epsilon,\{\xi_i\} - I| < \epsilon 
+		\end{align*}
+
+Esto significa que:
+		\begin{equation}
+		    	I - \epsilon < \sigma (f,P,\{\xi_i\} < I + \epsilon
+		\end{equation}
+		
+En específico, tomando $ \sigma (f,P_\epsilon,\{\xi_i\} =S(f,P)$ y $\sigma (f,P_\epsilon,\{\xi_i\}=s(f,P)$ tenemos :
+$S(f,P)<\varepsilon+I$
+$s(f,P)>I- \varepsilon$
+
+Luego sumando ambas ecuaciones llegamos a:
+$S(f,P)-s(f,P)<\varepsilon$
+
+Finalmente tenemos que:
+\begin{equation}
+     f \in \mathcal{R}[a, b] \implies \forall \epsilon > 0,  S(f,P)-s(f,P) < \varepsilon
+\end{equation}
+\begin{flushright}
+				$\square$
+\end{flushright}
+            
+Demostremos que:
+\begin{equation}
+\forall \epsilon > 0,\;  S(f,P)-s(f,P) < \varepsilon \implies \underline{I} =\overline{I}
+\end{equation}
+Supongamos que $\overline{I} \neq \underline{I}$ y $\forall \epsilon > 0,\;  S(f,P)-s(f,P) < \varepsilon$ para encontrar una contradicción.
+
+ Por la propiedad $(6)$ tenemos que $\overline{\mathrm{I}} > \underline{\mathrm{I}}$ , por lo que existe una constante $k$ tal que:
+\begin{equation}
+   \overline{I} -\underline{I}>k
+\end{equation}
+
+Como $\overline{\mathrm{I}}$ y $\underline{\mathrm{I}}$ son infimo y supremo de las sumas de Darboux, tenemos que:
+		\begin{align*}
+			\forall P:&\\
+			&S(f, P) \geq \overline{\mathrm{I}} \\
+			&s(f, P) \leq \underline{\mathrm{I}}
+		\end{align*}
+Restando ambas expresiones:
+\begin{equation}
+    S(f, P) - s(f, P) \geq \overline{I}- \underline{I}> k.
+\end{equation}
+Con lo que tenemos:
+\begin{equation}
+    S(f, P) - s(f, P) > k.
+\end{equation}
+
+De nuestra hipótesis tenemos  $\forall \epsilon > 0,\;  S(f,P)-s(f,P) < \varepsilon$. Tomando $\epsilon=k$ llegamos a :
+\begin{equation}
+    S(f,P)-s(f,P) < k
+\end{equation}
+Lo cual contradice $(24)$ por lo que llegamos a:
+\begin{equation}
+\underline{I} \neq\overline{I}\implies \forall \epsilon > 0,\;  S(f,P)-s(f,P) \geq\varepsilon
+\end{equation}
+Por lo que 
+\begin{equation}
+    \forall \epsilon > 0,\;  S(f,P)-s(f,P) < \varepsilon \implies \underline{I}  =\overline{I} 
+\end{equation}
+\begin{flushright}
+				$\square$
+			\end{flushright}
+Procedemos ahora a demostrar  que:
+\begin{equation}
+\underline{I} =\overline{I}\implies
+   f \in \mathcal{R}[a, b] 
+\end{equation}
+Por definición de integral de Riemann tenemos que:
+\begin{equation}
+    f\in{R}[a; b] \iff \exists I:\forall P \quad\lim \sigma (f,P,\{\xi_i\}) = I \quad 
+\end{equation}
+Tenemos:
+\begin{equation}
+    \overline{I} = \underline{I} = I.
+\end{equation}
+Luego, dado que  $\overline{\mathrm{I}}$ e $\underline{\mathrm{I}}$ se definen como infimo y supremo de las sumas de Darboux, podemos asegurar que:
+			\begin{align*}
+				\forall \epsilon > 0  &\quad\exists P_{\epsilon_1}, P_{\epsilon_2}: \\
+				s(f, P_{\epsilon_1}) &> I - \epsilon \\
+				S(f, P_{\epsilon_2}) &< I + \epsilon
+			\end{align*}
+Tomando $P = P_{\epsilon_1}\cup P_{\epsilon_2}, $  tenemos que $P\supset P_{\epsilon_1}$ y $P\supset P_{\epsilon_2}$. Por la $Propiedad \; 3 $  llegamos a que 
+
+\begin{equation}
+	\forall \epsilon > 0  \quad\exists P: 
+\end{equation}
+\begin{equation}
+    s(f, P) \geq I - \varepsilon
+\end{equation}
+\begin{equation}
+    S(f, P) \leq  I + \varepsilon.
+\end{equation}
+Sumando estas desigualdades tenemos que  , $\forall P_k, \quad P_k \supset P$::
+\begin{equation}
+    I - \varepsilon \leq s(f,P_k) \leq S(f, P_k) \leq I + \varepsilon.
+\end{equation}
+Por el Lema 1 tenemos:
+\begin{equation}
+  s(f,P_k)  \leq \ \sigma (f,P_k,\{\xi_i\})  \leq S(f, P_k) 
+\end{equation}
+\begin{equation}
+    I - \varepsilon \leq s(f, P_\varepsilon)  \leq \sigma (f,P_k,\{\xi_i\}) \leq S(f, P_\varepsilon) \leq I + \varepsilon.
+\end{equation}
+Finalmente, se concluye:
+\begin{equation}
+    I - \varepsilon\leq \sigma(P, \xi_i) \leq  I + \varepsilon.
+\end{equation}
+De donde :
+\begin{equation}
+    |\sigma(f, P) - I| < \varepsilon
+\end{equation}
+ Por lo que podemos afirmar que:
+ 	\begin{equation}
+ 	    \exists I:\forall\epsilon >0 \quad\exists P: \forall P_k \supset P \quad|\sigma (f,P_k,\{\xi_i\}) - I| < \epsilon
+ 	\end{equation}
+Con lo que tenemos:
+\begin{equation}
+\underline{I} =\overline{I}\implies
+   f \in \mathcal{R}[a, b] 
+\end{equation}
+
+            \begin{flushright}
+				$\square$
+			\end{flushright}
+
+ Para concluir nuestra demostración tenemos que:
+ \begin{equation}
+     f \in \mathcal{R}[a, b] \implies \forall \epsilon > 0,  S(f,P)-s(f,P) < \varepsilon
+\end{equation}
+\begin{equation}
+\forall \epsilon > 0,\;  S(f,P)-s(f,P) < \varepsilon \implies \underline{I} =\overline{I}
+\end{equation}\begin{equation}
+\underline{I} =\overline{I}\implies
+   f \in \mathcal{R}[a, b] 
+\end{equation}
+Aplicando transitividad en estas tres implicaciones llegamos a la conclusion de que son equivalentes. Luego hemos demostrado que:
+\begin{equation}
+    f \in \mathcal{R}[a, b] \iff \forall \epsilon > 0, \exists \, \mathcal{P}_\epsilon \text{  tal que } P \supset P_\epsilon \ \;  |\sigma(f, P) - I| < \varepsilon
+
+\end{equation}
+ \hfill \(\blacksquare\)
+
+\section{Conclusiones}
+En este trabajo se ha demostrado el \textbf{teorema de necesidad y suficiencia para la integrabilidad de Riemann}, el cual establece las condiciones bajo las cuales una función puede ser integrada en este sentido. A través del uso de las \textbf{sumas de Darboux}, se ha visto cómo la existencia de particiones adecuadas permite garantizar la integrabilidad de una función en un intervalo dado. \par
+
+Este resultado es fundamental en el análisis matemático, ya que ayuda a comprender mejor el comportamiento de las funciones y su relación con el concepto de integral. Además, el uso de herramientas computacionales puede facilitar la visualización de estos conceptos y reforzar su comprensión. \par
+
+Se recomienda a los estudiantes demostrar todas las propiedades utilizadas en la demostración del teorema, ya que esto les permitirá afianzar sus conocimientos y comprender mejor los fundamentos de la integral de Riemann. \par
+
+ 
+
+\end{document}
