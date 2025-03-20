@@ -25,6 +25,7 @@ class InteractiveApp:
         self.animation_speed = 500  # milliseconds
         self.details = {}
         self.animation_running = False
+        self.partition_type = "random"  # Default partition type
 
         # Available functions - easy to modify
         self.functions = {
@@ -92,27 +93,71 @@ class InteractiveApp:
         self.b_entry.insert(0, "1")
         self.b_entry.grid(row=0, column=4, padx=5, pady=5)
 
+        # Partition type selection
+        partition_frame = ctk.CTkFrame(self.control_frame)
+        partition_frame.pack(fill="x", pady=10, padx=20)
+
+        ctk.CTkLabel(partition_frame, text="Partition Type:", font=ctk.CTkFont(size=14)).pack(pady=(5, 5))
+
+        # Radio buttons for partition type
+        self.partition_var = ctk.StringVar(value="random")
+
+        partition_radio_frame = ctk.CTkFrame(partition_frame, fg_color="transparent")
+        partition_radio_frame.pack(fill="x", pady=5)
+
+        random_radio = ctk.CTkRadioButton(
+            partition_radio_frame,
+            text="Random",
+            variable=self.partition_var,
+            value="random",
+            font=ctk.CTkFont(size=14)
+        )
+        random_radio.grid(row=0, column=0, padx=20, pady=5)
+
+        equidistant_radio = ctk.CTkRadioButton(
+            partition_radio_frame,
+            text="Equidistant",
+            variable=self.partition_var,
+            value="equidistant",
+            font=ctk.CTkFont(size=14)
+        )
+        equidistant_radio.grid(row=0, column=1, padx=20, pady=5)
+
         # Max points setting
         ctk.CTkLabel(self.control_frame, text="Maximum Number of Points:", font=ctk.CTkFont(size=14)).pack(pady=(10, 5))
         self.max_points_entry = ctk.CTkEntry(self.control_frame, width=100, font=ctk.CTkFont(size=14))
         self.max_points_entry.insert(0, "15")
         self.max_points_entry.pack(pady=(0, 10))
 
+        # Max points hint
+        max_points_hint = ctk.CTkLabel(
+            self.control_frame,
+            text="(Maximum limit: 1000 points)",
+            font=ctk.CTkFont(size=12),
+            text_color="gray"
+        )
+        max_points_hint.pack(pady=(0, 10))
+
         # Animation speed
         ctk.CTkLabel(self.control_frame, text="Animation Speed:", font=ctk.CTkFont(size=14)).pack(pady=(10, 5))
         self.speed_slider = ctk.CTkSlider(
             self.control_frame,
-            from_=100,
-            to=2000,
-            number_of_steps=19,
+            from_=2000,  # Inverted range: slow (left) to fast (right)
+            to=50,
+            number_of_steps=39,
             command=self.on_speed_change
         )
         self.speed_slider.set(500)  # Default speed
-        self.speed_slider.pack(pady=(0, 10), fill="x", padx=20)
+        self.speed_slider.pack(pady=(0, 5), fill="x", padx=20)
 
-        # Speed label
-        self.speed_label = ctk.CTkLabel(self.control_frame, text="500 ms", font=ctk.CTkFont(size=14))
-        self.speed_label.pack(pady=(0, 10))
+        # Speed labels
+        speed_labels_frame = ctk.CTkFrame(self.control_frame, fg_color="transparent")
+        speed_labels_frame.pack(fill="x", padx=20)
+
+        ctk.CTkLabel(speed_labels_frame, text="Slow", font=ctk.CTkFont(size=12), text_color="gray").pack(side="left")
+        self.speed_label = ctk.CTkLabel(speed_labels_frame, text=f"{self.animation_speed} ms", font=ctk.CTkFont(size=12))
+        self.speed_label.pack(side="top")
+        ctk.CTkLabel(speed_labels_frame, text="Fast", font=ctk.CTkFont(size=12), text_color="gray").pack(side="right")
 
         # Buttons frame
         buttons_frame = ctk.CTkFrame(self.control_frame)
@@ -244,6 +289,12 @@ class InteractiveApp:
             b = float(self.b_entry.get())
             max_points = int(self.max_points_entry.get())
 
+            # Enforce maximum point limit
+            if max_points > 1000:
+                max_points = 1000
+                self.max_points_entry.delete(0, 'end')
+                self.max_points_entry.insert(0, "1000")
+
             # Check valid input
             if a >= b:
                 self.show_error("Upper bound must be greater than lower bound")
@@ -260,6 +311,9 @@ class InteractiveApp:
             self.a_entry.configure(state="disabled")
             self.b_entry.configure(state="disabled")
             self.max_points_entry.configure(state="disabled")
+
+            # Store partition type
+            self.partition_type = self.partition_var.get()
 
             # Initial partition with just end points
             self.current_points = [a, b]
@@ -334,12 +388,27 @@ class InteractiveApp:
         if not self.animation_running:
             return
 
-        # Add a new point
-        self.current_points, self.details = calculate_add_point(
-            self.current_points,
-            self.selected_function,
-            self.details
-        )
+        # Add a new point based on partition type
+        if self.partition_type == "random":
+            # Random partition - add point to largest subinterval
+            self.current_points, self.details = calculate_add_point(
+                self.current_points,
+                self.selected_function,
+                self.details
+            )
+        else:
+            # Equidistant partition
+            a = min(self.current_points)
+            b = max(self.current_points)
+            n = len(self.current_points)
+            # Create equidistant points
+            equidistant_points = [a + i * (b - a) / (n) for i in range(n + 1)]
+            self.current_points = equidistant_points
+            # Recalculate the sums
+            self.current_points, self.details = calculate_darboux_sums(
+                self.current_points,
+                self.selected_function
+            )
 
         # Update the plot
         update_plot(

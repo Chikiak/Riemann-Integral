@@ -57,18 +57,27 @@ def calculate_darboux_sums(points:list[float], func: Callable):
 def calculate_add_point(points: list[float], func: Callable, details: dict[str, float]):
     ms_index:int = int(details['max_subinterval'])
     ms_size:float = points[ms_index + 1] - points[ms_index]
-     
-    new_point = rd.random() * ms_size + points[ms_index]
-    points.insert(ms_index + 1, new_point)
 
-    lower_sum: float = details['lower_sum']
-    upper_sum: float = details['upper_sum']
+    # Calcular el area del intervalo que se va a dividir 
+    x_values = np.linspace(points[ms_index], points[ms_index + 1], 100)
+    y_values = func(x_values)
+
+    min_val:float = np.min(y_values)
+    max_val:float = np.max(y_values)
+
+    lower_area = min_val * ms_size
+    upper_area = max_val * ms_size
+
+
+    lower_sum: float = details['lower_sum'] - lower_area
+    upper_sum: float = details['upper_sum'] - upper_area
     max_s: float = 0
     aux_max: float = 0
-    lower_area:float = 0
-    upper_area:float = 0
     details: dict[str, float] = {}
-     
+
+    new_point = rd.random() * ms_size + points[ms_index]
+    points.insert(ms_index + 1, new_point)
+    
     for i in range(len(points) - 1):
         a: float = points[i]
         b: float = points[i+1]
@@ -79,7 +88,7 @@ def calculate_add_point(points: list[float], func: Callable, details: dict[str, 
             aux_max = delta_x
             max_s = i
          
-        if i!=ms_index or i!=ms_index+1:
+        if i!=ms_index and i!=ms_index+1:
             continue
          
     
