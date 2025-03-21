@@ -4,13 +4,6 @@ import random as rd
 
 
 def calculate_darboux_sums(points:list[float], func: Callable):
-    '''
-    Calculate the lower and upper Darboux sums for a function over a partition.
-    
-    :param points: A list of points defining the partition (in ascending order)
-    :param func: The function to integrate
-    :return: tuple(lower_sum, upper_sum, details_dict)
-    '''
     lower_sum: float = 0
     upper_sum: float = 0
     max_s: float = 0
@@ -83,7 +76,7 @@ def calculate_add_point(points: list[float], func: Callable, details: dict[str, 
         b: float = points[i+1]
         delta_x:float = b - a
 
-        # Indice del puntos inicial del mayor subintervalo
+        # Indice del punto inicial del mayor subintervalo
         if delta_x > aux_max:
             aux_max = delta_x
             max_s = i

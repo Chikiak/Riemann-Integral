@@ -12,6 +12,9 @@ class InteractiveApp:
         self.root.title("Interactive Darboux Sums Visualizer")
         self.root.geometry("1200x800")
 
+        # Make the app responsive to window resizing
+        self.root.minsize(800, 600)  # Minimum window size
+
         # Set dark theme
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("dark-blue")
@@ -31,12 +34,12 @@ class InteractiveApp:
         self.functions = {
             "f(x) = x²": lambda x: x**2,
             "f(x) = sin(x)": lambda x: np.sin(x),
-            "f(x) = e^x": lambda x: np.exp(x),
+            "f(x) = e^x * sin(x) + x²": lambda x: np.exp(x) * np.sin(x) + x**2,
             "f(x) = 1/x": lambda x: 1/x,
             "f(x) = x³ - 2x² + 2": lambda x: x**3 - 2*x**2 + 2
         }
 
-        # Configure grid layout
+        # Configure grid layout with proper weights for responsiveness
         self.root.grid_columnconfigure(0, weight=1)
         self.root.grid_columnconfigure(1, weight=4)
         self.root.grid_rowconfigure(0, weight=1)
@@ -51,8 +54,51 @@ class InteractiveApp:
         self.create_control_panel()
         self.create_graph_panel()
 
+        # Configure resize event binding
+        self.root.bind("<Configure>", self.on_window_resize)
+
         # Initialize with default function after everything is created
         self.on_function_select(list(self.functions.keys())[0])
+
+    def on_window_resize(self, event):
+        """Handle window resize event"""
+        # Only respond if it's the main window being resized
+        if event.widget == self.root:
+            # Redraw the canvas to adapt to new size
+            self.canvas.draw()
+
+            # Adjust font sizes based on window width
+            new_window_width = event.width
+            if new_window_width < 1000:
+                # Smaller fonts for smaller windows
+                self.update_font_sizes("small")
+            elif new_window_width < 1400:
+                # Medium fonts for medium windows
+                self.update_font_sizes("medium")
+            else:
+                # Larger fonts for larger windows
+                self.update_font_sizes("large")
+
+    def update_font_sizes(self, size):
+        """Update font sizes based on window size"""
+        if size == "small":
+            title_size = 18
+            label_size = 12
+            button_size = 12
+        elif size == "medium":
+            title_size = 20
+            label_size = 14
+            button_size = 14
+        else:  # large
+            title_size = 22
+            label_size = 16
+            button_size = 16
+
+        # Update main title font
+        for widget in self.control_frame.winfo_children():
+            if isinstance(widget, ctk.CTkLabel) and widget.cget("text") == "Darboux Sums":
+                widget.configure(font=ctk.CTkFont(size=title_size, weight="bold"))
+                break
 
     def create_control_panel(self):
         """Create the left control panel with all the UI elements."""
@@ -60,50 +106,71 @@ class InteractiveApp:
         self.control_frame = ctk.CTkFrame(self.root)
         self.control_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
+        # Configure internal grid for responsiveness
+        self.control_frame.grid_columnconfigure(0, weight=1)
+        self.control_frame.grid_rowconfigure(7, weight=1)  # Make results frame expandable
+
         # Title
-        ctk.CTkLabel(self.control_frame, text="Darboux Sums", font=ctk.CTkFont(size=22, weight="bold")).pack(pady=10)
+        ctk.CTkLabel(self.control_frame, text="Darboux Sums", font=ctk.CTkFont(size=22, weight="bold")).grid(
+            row=0, column=0, pady=10, sticky="ew")
 
         # Function selection
-        ctk.CTkLabel(self.control_frame, text="Select Function:", font=ctk.CTkFont(size=16)).pack(pady=(10, 5))
+        function_select_frame = ctk.CTkFrame(self.control_frame)
+        function_select_frame.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
+        function_select_frame.grid_columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(function_select_frame, text="Select Function:", font=ctk.CTkFont(size=16)).grid(
+            row=0, column=0, pady=(5, 0), sticky="w")
+
         self.function_var = ctk.StringVar(value=list(self.functions.keys())[0])
         self.function_menu = ctk.CTkOptionMenu(
-            self.control_frame,
+            function_select_frame,
             values=list(self.functions.keys()),
             variable=self.function_var,
             command=self.on_function_select,
             font=ctk.CTkFont(size=14)
         )
-        self.function_menu.pack(pady=(0, 10), fill="x", padx=20)
+        self.function_menu.grid(row=1, column=0, pady=(0, 5), sticky="ew", padx=5)
 
         # Interval settings
         interval_frame = ctk.CTkFrame(self.control_frame)
-        interval_frame.pack(fill="x", pady=10, padx=20)
+        interval_frame.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
+        interval_frame.grid_columnconfigure(0, weight=1)
+        interval_frame.grid_columnconfigure(2, weight=1)
+        interval_frame.grid_columnconfigure(4, weight=1)
 
-        ctk.CTkLabel(interval_frame, text="Interval:", font=ctk.CTkFont(size=14)).grid(row=0, column=0, padx=5, pady=5)
+        ctk.CTkLabel(interval_frame, text="Interval:", font=ctk.CTkFont(size=14)).grid(
+            row=0, column=0, columnspan=5, padx=5, pady=5, sticky="w")
 
         # Lower bound
-        ctk.CTkLabel(interval_frame, text="a =", font=ctk.CTkFont(size=14)).grid(row=0, column=1, padx=5, pady=5)
+        ctk.CTkLabel(interval_frame, text="a =", font=ctk.CTkFont(size=14)).grid(
+            row=1, column=0, padx=5, pady=5, sticky="e")
         self.a_entry = ctk.CTkEntry(interval_frame, width=60, font=ctk.CTkFont(size=14))
         self.a_entry.insert(0, "0")
-        self.a_entry.grid(row=0, column=2, padx=5, pady=5)
+        self.a_entry.grid(row=1, column=1, padx=5, pady=5, sticky="w")
 
         # Upper bound
-        ctk.CTkLabel(interval_frame, text="b =", font=ctk.CTkFont(size=14)).grid(row=0, column=3, padx=5, pady=5)
+        ctk.CTkLabel(interval_frame, text="b =", font=ctk.CTkFont(size=14)).grid(
+            row=1, column=3, padx=5, pady=5, sticky="e")
         self.b_entry = ctk.CTkEntry(interval_frame, width=60, font=ctk.CTkFont(size=14))
         self.b_entry.insert(0, "1")
-        self.b_entry.grid(row=0, column=4, padx=5, pady=5)
+        self.b_entry.grid(row=1, column=4, padx=5, pady=5, sticky="w")
 
         # Partition type selection
         partition_frame = ctk.CTkFrame(self.control_frame)
-        partition_frame.pack(fill="x", pady=10, padx=20)
+        partition_frame.grid(row=3, column=0, padx=10, pady=5, sticky="ew")
+        partition_frame.grid_columnconfigure(0, weight=1)
 
-        ctk.CTkLabel(partition_frame, text="Partition Type:", font=ctk.CTkFont(size=14)).pack(pady=(5, 5))
+        ctk.CTkLabel(partition_frame, text="Partition Type:", font=ctk.CTkFont(size=14)).grid(
+            row=0, column=0, padx=5, pady=5, sticky="w")
 
         # Radio buttons for partition type
         self.partition_var = ctk.StringVar(value="random")
 
         partition_radio_frame = ctk.CTkFrame(partition_frame, fg_color="transparent")
-        partition_radio_frame.pack(fill="x", pady=5)
+        partition_radio_frame.grid(row=1, column=0, sticky="ew")
+        partition_radio_frame.grid_columnconfigure(0, weight=1)
+        partition_radio_frame.grid_columnconfigure(1, weight=1)
 
         random_radio = ctk.CTkRadioButton(
             partition_radio_frame,
@@ -112,7 +179,7 @@ class InteractiveApp:
             value="random",
             font=ctk.CTkFont(size=14)
         )
-        random_radio.grid(row=0, column=0, padx=20, pady=5)
+        random_radio.grid(row=0, column=0, padx=20, pady=5, sticky="w")
 
         equidistant_radio = ctk.CTkRadioButton(
             partition_radio_frame,
@@ -121,47 +188,67 @@ class InteractiveApp:
             value="equidistant",
             font=ctk.CTkFont(size=14)
         )
-        equidistant_radio.grid(row=0, column=1, padx=20, pady=5)
+        equidistant_radio.grid(row=0, column=1, padx=20, pady=5, sticky="w")
 
         # Max points setting
-        ctk.CTkLabel(self.control_frame, text="Maximum Number of Points:", font=ctk.CTkFont(size=14)).pack(pady=(10, 5))
-        self.max_points_entry = ctk.CTkEntry(self.control_frame, width=100, font=ctk.CTkFont(size=14))
+        max_points_frame = ctk.CTkFrame(self.control_frame)
+        max_points_frame.grid(row=4, column=0, padx=10, pady=5, sticky="ew")
+        max_points_frame.grid_columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(max_points_frame, text="Maximum Number of Points:", font=ctk.CTkFont(size=14)).grid(
+            row=0, column=0, padx=5, pady=(5, 0), sticky="w")
+
+        self.max_points_entry = ctk.CTkEntry(max_points_frame, width=100, font=ctk.CTkFont(size=14))
         self.max_points_entry.insert(0, "15")
-        self.max_points_entry.pack(pady=(0, 10))
+        self.max_points_entry.grid(row=1, column=0, padx=5, pady=5, sticky="ew")
 
         # Max points hint
         max_points_hint = ctk.CTkLabel(
-            self.control_frame,
+            max_points_frame,
             text="(Maximum limit: 1000 points)",
             font=ctk.CTkFont(size=12),
             text_color="gray"
         )
-        max_points_hint.pack(pady=(0, 10))
+        max_points_hint.grid(row=2, column=0, padx=5, pady=(0, 5), sticky="w")
 
         # Animation speed
-        ctk.CTkLabel(self.control_frame, text="Animation Speed:", font=ctk.CTkFont(size=14)).pack(pady=(10, 5))
+        speed_frame = ctk.CTkFrame(self.control_frame)
+        speed_frame.grid(row=5, column=0, padx=10, pady=5, sticky="ew")
+        speed_frame.grid_columnconfigure(0, weight=1)
+
+        ctk.CTkLabel(speed_frame, text="Animation Speed:", font=ctk.CTkFont(size=14)).grid(
+            row=0, column=0, padx=5, pady=(5, 0), sticky="w")
+
         self.speed_slider = ctk.CTkSlider(
-            self.control_frame,
+            speed_frame,
             from_=2000,  # Inverted range: slow (left) to fast (right)
             to=50,
             number_of_steps=39,
             command=self.on_speed_change
         )
         self.speed_slider.set(500)  # Default speed
-        self.speed_slider.pack(pady=(0, 5), fill="x", padx=20)
+        self.speed_slider.grid(row=1, column=0, padx=5, pady=5, sticky="ew")
 
         # Speed labels
-        speed_labels_frame = ctk.CTkFrame(self.control_frame, fg_color="transparent")
-        speed_labels_frame.pack(fill="x", padx=20)
+        speed_labels_frame = ctk.CTkFrame(speed_frame, fg_color="transparent")
+        speed_labels_frame.grid(row=2, column=0, padx=5, pady=(0, 5), sticky="ew")
+        speed_labels_frame.grid_columnconfigure(0, weight=1)
+        speed_labels_frame.grid_columnconfigure(2, weight=1)
 
-        ctk.CTkLabel(speed_labels_frame, text="Slow", font=ctk.CTkFont(size=12), text_color="gray").pack(side="left")
+        ctk.CTkLabel(speed_labels_frame, text="Slow", font=ctk.CTkFont(size=12), text_color="gray").grid(
+            row=0, column=0, sticky="w")
+
         self.speed_label = ctk.CTkLabel(speed_labels_frame, text=f"{self.animation_speed} ms", font=ctk.CTkFont(size=12))
-        self.speed_label.pack(side="top")
-        ctk.CTkLabel(speed_labels_frame, text="Fast", font=ctk.CTkFont(size=12), text_color="gray").pack(side="right")
+        self.speed_label.grid(row=0, column=1)
+
+        ctk.CTkLabel(speed_labels_frame, text="Fast", font=ctk.CTkFont(size=12), text_color="gray").grid(
+            row=0, column=2, sticky="e")
 
         # Buttons frame
         buttons_frame = ctk.CTkFrame(self.control_frame)
-        buttons_frame.pack(fill="x", pady=10, padx=20)
+        buttons_frame.grid(row=6, column=0, padx=10, pady=5, sticky="ew")
+        buttons_frame.grid_columnconfigure(0, weight=1)
+        buttons_frame.grid_columnconfigure(1, weight=1)
 
         # Start button
         self.start_button = ctk.CTkButton(
@@ -172,7 +259,7 @@ class InteractiveApp:
             fg_color="#28a745",
             hover_color="#218838"
         )
-        self.start_button.grid(row=0, column=0, padx=5, pady=5)
+        self.start_button.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
 
         # Reset button
         self.reset_button = ctk.CTkButton(
@@ -183,17 +270,22 @@ class InteractiveApp:
             fg_color="#dc3545",
             hover_color="#c82333"
         )
-        self.reset_button.grid(row=0, column=1, padx=5, pady=5)
+        self.reset_button.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
         # Results display
         self.results_frame = ctk.CTkFrame(self.control_frame, corner_radius=10)
-        self.results_frame.pack(fill="x", pady=10, padx=20)
+        self.results_frame.grid(row=7, column=0, padx=10, pady=5, sticky="nsew")
+        self.results_frame.grid_columnconfigure(0, weight=1)
+        self.results_frame.grid_rowconfigure(1, weight=1)
 
-        ctk.CTkLabel(self.results_frame, text="Results", font=ctk.CTkFont(size=18, weight="bold")).pack(pady=(10, 15))
+        ctk.CTkLabel(self.results_frame, text="Results", font=ctk.CTkFont(size=18, weight="bold")).grid(
+            row=0, column=0, pady=(10, 5), sticky="ew")
 
         # Create a results display frame
         results_display = ctk.CTkFrame(self.results_frame, fg_color="transparent")
-        results_display.pack(fill="x", padx=15, pady=(0, 15))
+        results_display.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
+        results_display.grid_columnconfigure(0, weight=1)
+        results_display.grid_columnconfigure(1, weight=1)
 
         # Current points count with better styling
         points_label_text = ctk.CTkLabel(results_display, text="Number of Points:",
@@ -240,20 +332,21 @@ class InteractiveApp:
                                        anchor="e")
         self.diff_label.grid(row=3, column=1, sticky="e", pady=5)
 
-        # Configure grid to make labels align properly
-        results_display.grid_columnconfigure(0, weight=1)
-        results_display.grid_columnconfigure(1, weight=1)
-
     def create_graph_panel(self):
         """Create the right panel with the matplotlib graph."""
         # Graph panel frame
         self.graph_frame = ctk.CTkFrame(self.root)
         self.graph_frame.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+        self.graph_frame.grid_columnconfigure(0, weight=1)
+        self.graph_frame.grid_rowconfigure(0, weight=1)
 
         # Create canvas using the previously initialized figure
         self.canvas = FigureCanvasTkAgg(self.figure, master=self.graph_frame)
         self.canvas_widget = self.canvas.get_tk_widget()
-        self.canvas_widget.pack(fill="both", expand=True, padx=10, pady=10)
+        self.canvas_widget.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+        # Configure tight layout for better responsiveness in the plot
+        self.figure.tight_layout()
 
     def on_function_select(self, function_name):
         """Handle function selection."""
@@ -272,6 +365,8 @@ class InteractiveApp:
                 self.ax.tick_params(colors='white')
                 for spine in self.ax.spines.values():
                     spine.set_color('gray')
+                # Use tight layout to ensure proper display
+                self.figure.tight_layout()
                 self.canvas.draw()
             except (ValueError, AttributeError):
                 pass
@@ -330,6 +425,8 @@ class InteractiveApp:
                 self.details['lower_sum'],
                 self.details['upper_sum']
             )
+            # Use tight layout for proper display
+            self.figure.tight_layout()
             self.canvas.draw()
 
             # Update labels
@@ -361,6 +458,17 @@ class InteractiveApp:
         error_window.transient(self.root)
         error_window.grab_set()
 
+        # Center dialog on parent window
+        width = 400
+        height = 150
+        parent_x = self.root.winfo_rootx()
+        parent_y = self.root.winfo_rooty()
+        parent_width = self.root.winfo_width()
+        parent_height = self.root.winfo_height()
+        x = parent_x + (parent_width - width) // 2
+        y = parent_y + (parent_height - height) // 2
+        error_window.geometry(f'{width}x{height}+{x}+{y}')
+
         # Message
         ctk.CTkLabel(error_window, text=message, font=ctk.CTkFont(size=14)).pack(pady=(20, 10))
 
@@ -374,14 +482,6 @@ class InteractiveApp:
             fg_color="#dc3545",
             hover_color="#c82333"
         ).pack(pady=(10, 20))
-
-        # Center the window
-        error_window.update_idletasks()
-        width = error_window.winfo_width()
-        height = error_window.winfo_height()
-        x = (error_window.winfo_screenwidth() // 2) - (width // 2)
-        y = (error_window.winfo_screenheight() // 2) - (height // 2)
-        error_window.geometry(f'{width}x{height}+{x}+{y}')
 
     def animation_step(self, max_points):
         """Perform one step of the animation."""
@@ -418,6 +518,8 @@ class InteractiveApp:
             self.details['lower_sum'],
             self.details['upper_sum']
         )
+        # Ensure tight layout on updates
+        self.figure.tight_layout()
         self.canvas.draw()
 
         # Update results display
@@ -462,6 +564,8 @@ class InteractiveApp:
             self.ax.tick_params(colors='white')
             for spine in self.ax.spines.values():
                 spine.set_color('gray')
+            # Apply tight layout on reset
+            self.figure.tight_layout()
             self.canvas.draw()
         except ValueError:
             pass
