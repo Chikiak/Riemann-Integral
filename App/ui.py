@@ -93,9 +93,9 @@ class InteractiveApp:
             title_size = 22
             label_size = 16
             button_size = 16
-
+    
         # Update main title font
-        for widget in self.control_frame.winfo_children():
+        for widget in self.scrollable_frame.winfo_children():
             if isinstance(widget, ctk.CTkLabel) and widget.cget("text") == "Darboux Sums":
                 widget.configure(font=ctk.CTkFont(size=title_size, weight="bold"))
                 break
@@ -105,17 +105,22 @@ class InteractiveApp:
         # Control panel frame
         self.control_frame = ctk.CTkFrame(self.root)
         self.control_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
-
+    
         # Configure internal grid for responsiveness
         self.control_frame.grid_columnconfigure(0, weight=1)
-        self.control_frame.grid_rowconfigure(7, weight=1)  # Make results frame expandable
-
+        self.control_frame.grid_rowconfigure(0, weight=1)  # Make the scrollable frame expandable
+    
+        # Create scrollable frame for all controls
+        self.scrollable_frame = ctk.CTkScrollableFrame(self.control_frame)
+        self.scrollable_frame.grid(row=0, column=0, sticky="nsew", padx=0, pady=0)
+        self.scrollable_frame.grid_columnconfigure(0, weight=1)
+    
         # Title
-        ctk.CTkLabel(self.control_frame, text="Darboux Sums", font=ctk.CTkFont(size=22, weight="bold")).grid(
+        ctk.CTkLabel(self.scrollable_frame, text="Darboux Sums", font=ctk.CTkFont(size=22, weight="bold")).grid(
             row=0, column=0, pady=10, sticky="ew")
-
+    
         # Function selection
-        function_select_frame = ctk.CTkFrame(self.control_frame)
+        function_select_frame = ctk.CTkFrame(self.scrollable_frame)
         function_select_frame.grid(row=1, column=0, padx=10, pady=5, sticky="ew")
         function_select_frame.grid_columnconfigure(0, weight=1)
 
@@ -133,7 +138,7 @@ class InteractiveApp:
         self.function_menu.grid(row=1, column=0, pady=(0, 5), sticky="ew", padx=5)
 
         # Interval settings
-        interval_frame = ctk.CTkFrame(self.control_frame)
+        interval_frame = ctk.CTkFrame(self.scrollable_frame)
         interval_frame.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
         interval_frame.grid_columnconfigure(0, weight=1)
         interval_frame.grid_columnconfigure(2, weight=1)
@@ -157,7 +162,7 @@ class InteractiveApp:
         self.b_entry.grid(row=1, column=4, padx=5, pady=5, sticky="w")
 
         # Partition type selection
-        partition_frame = ctk.CTkFrame(self.control_frame)
+        partition_frame = ctk.CTkFrame(self.scrollable_frame)
         partition_frame.grid(row=3, column=0, padx=10, pady=5, sticky="ew")
         partition_frame.grid_columnconfigure(0, weight=1)
 
@@ -191,7 +196,7 @@ class InteractiveApp:
         equidistant_radio.grid(row=0, column=1, padx=20, pady=5, sticky="w")
 
         # Max points setting
-        max_points_frame = ctk.CTkFrame(self.control_frame)
+        max_points_frame = ctk.CTkFrame(self.scrollable_frame)
         max_points_frame.grid(row=4, column=0, padx=10, pady=5, sticky="ew")
         max_points_frame.grid_columnconfigure(0, weight=1)
 
@@ -212,7 +217,7 @@ class InteractiveApp:
         max_points_hint.grid(row=2, column=0, padx=5, pady=(0, 5), sticky="w")
 
         # Animation speed
-        speed_frame = ctk.CTkFrame(self.control_frame)
+        speed_frame = ctk.CTkFrame(self.scrollable_frame)
         speed_frame.grid(row=5, column=0, padx=10, pady=5, sticky="ew")
         speed_frame.grid_columnconfigure(0, weight=1)
 
@@ -245,7 +250,7 @@ class InteractiveApp:
             row=0, column=2, sticky="e")
 
         # Buttons frame
-        buttons_frame = ctk.CTkFrame(self.control_frame)
+        buttons_frame = ctk.CTkFrame(self.scrollable_frame)
         buttons_frame.grid(row=6, column=0, padx=10, pady=5, sticky="ew")
         buttons_frame.grid_columnconfigure(0, weight=1)
         buttons_frame.grid_columnconfigure(1, weight=1)
@@ -273,7 +278,7 @@ class InteractiveApp:
         self.reset_button.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
 
         # Results display
-        self.results_frame = ctk.CTkFrame(self.control_frame, corner_radius=10)
+        self.results_frame = ctk.CTkFrame(self.scrollable_frame, corner_radius=10)
         self.results_frame.grid(row=7, column=0, padx=10, pady=5, sticky="nsew")
         self.results_frame.grid_columnconfigure(0, weight=1)
         self.results_frame.grid_rowconfigure(1, weight=1)
